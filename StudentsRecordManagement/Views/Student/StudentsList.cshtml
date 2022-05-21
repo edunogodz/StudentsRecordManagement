@@ -1,0 +1,123 @@
+﻿@using StudentsRecordManagement.Models;
+@model StudentsRecordManagement.Models.AllModels;
+
+
+@{
+    ViewData["Title"] = "Student List";
+}
+
+<div class="text-center">
+    <div class="row">
+        <div class="col-lg-12" style="margin-top:10px; margin-bottom:10px;">
+            @{
+                    @if (TempData["SuccessMsg"] != null)
+                {
+                        <h3 style="background-color: green;"> @TempData["SuccessMsg"]</h3>
+                }
+                    @if (TempData["ErrorMsg"] != null)
+                {
+                        <h3 style="background-color: red;"> An error occured. Please try again @TempData["ErrorMsg"]</h3>
+                }
+            }
+        </div>
+
+        <div class="col-lg-6 m-1" style="text-align: start;">
+            <form method="post" asp-area="" asp-controller="Student" asp-action="InsertUpdateStudent">
+                @Html.AntiForgeryToken()
+                <div class="form-group">
+                    <label for="FullName">Full Name</label>
+                    <input type="text" class="form-control" name="FullName" id="FullName" placeholder="Enter Full Name">
+                    <input type="hidden" id="StudentId" name="StudentId" />
+                </div>
+
+                <div class="form-group">
+                    <label for="EmailAddress">EmailAddress</label>
+                    <input type="email" class="form-control" name="EmailAddress" id="EmailAddress" aria-describedby="emailHelp" placeholder="Enter email">
+                </div>
+
+                <div class="form-group">
+                    <label for="City">City</label>
+                    <input type="text" class="form-control" name="City" id="City" placeholder="Enter City">
+                </div>
+
+                <button type="submit" class="btn btn-primary">Submit</button>
+            </form>
+        </div>
+        <div class="col-lg-12">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th scope="col">StudentID</th>
+                        <th scope="col">Student Name</th>
+                        <th scope="col">Email Address</th>
+                        <th scope="col">City</th>
+                        <th scope="col">CreatedOn</th>
+                        <th scope="col">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @{
+                            @if (Model.StudentList != null && Model.StudentList.Count > 0)
+                        {
+                            foreach (var item in Model.StudentList)
+                            {
+                                    <tr>
+                                        <td>@item.StudentId</td>
+                                        <td>@item.FullName</td>
+                                        <td>@item.EmailAddress</td>
+                                        <td>@item.City</td>
+                                        <td>@item.CreateOn</td>
+                                        <td>
+                                            <a class="btn btn-danger" onclick="DeleteStudent('@item.StudentId')">Delete</a><br>
+                                            <a class="btn btn-info" onclick="Updatetudent('@item.StudentId','@item.FullName','@item.EmailAddress','@item.City')">Edit</a>
+                                        </td>
+                                    </tr>
+                            }
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+
+<script>
+
+    function DeleteStudent(StudentId) {
+        let response = confirm("Do you really want to delete this record?");
+        if (response) {
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("DeleteStudent","Student")',
+                data: { StudentId: StudentId },
+                //contentType: "application/json; charset=utf-8",
+                //dataType: "json",
+
+                success: function(response) {
+                    if (response.message == 'Deleted Successfully') {
+                        window.location.reload();
+                    } else {
+                        alert(response.message);
+                    }
+                },
+                complete: function() {
+
+                },
+                failure: function(jqXHR, textStatus, errorThrown) {
+                    alert("An Error occured! Please try again");
+                }
+            });
+        }
+    }
+
+
+    function Updatetudent(StudentId,FullName,EmailAddress,City) {
+        $('#StudentId').val(StudentId);
+        $('#FullName').val(FullName);
+        $('#EmailAddress').val(EmailAddress);
+        $('#City').val(City);
+    }
+
+</script>
+
